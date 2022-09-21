@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-stl-api' doesn't seem to be linked. Make sure: \n\n` +
@@ -28,22 +28,77 @@ const register = NativeModules.register
       }
     );
 
+const ble = NativeModules.ble
+  ? NativeModules.ble
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
+const bleEmitter = new NativeEventEmitter(NativeModules.ble);
+
 interface RegisterGetNearbyDevice {
   id: string;
   type: number;
 }
 
 const API = {
+  ble: {
+    requestAdvertisePermission: (): Promise<null> => {
+      if (Platform.OS === 'android') {
+        return ble.requestAdvertisePermission();
+      }
+      return Promise.resolve(null);
+    },
+    requestScanPermissions: (): Promise<null> => {
+      if (Platform.OS === 'android') {
+        return ble.requestScanPermissions();
+      }
+      return Promise.resolve(null);
+    },
+    startScan: () => ble.startScan,
+    startScanByCompanyId: (companyId: number) =>
+      ble.startScanByCompanyId(companyId),
+    stopScan: () => ble.stopScan,
+    connect: (identifier: string) => ble.connect(identifier),
+    disconnect: () => ble.disconnect,
+    emitter: () => bleEmitter,
+    eventType: {
+      ON_READ_CHARACTERISTIC: 'CharacteristicRead',
+      ON_READ_DESCRIPTOR: 'DescriptorRead',
+      ON_FOUND: 'FoundBLEDevice',
+      ...Platform.select({
+        android: {
+          ON_PERMIT_SCAN: 'PermitBLEScan',
+          ON_PERMIT_ADVERTISE: 'PermitBLEAdvertise',
+        },
+        ios: {
+          ON_POWER_ON: 'CBCentralManagerPowerOn',
+          ON_POWER_OFF: 'CBCentralManagerPowerOff',
+          ON_UNAUTHORIZED: 'CBCentralManagerUnauthorized',
+        },
+      }),
+    },
+  },
   common: {
     name: common.name as string,
     version: common.version as string,
     buildVersion: common.buildVersion as number,
     identifier: common.identifier as string,
-    setWideColorGamut: function (colorMode: number): Promise<null> {
+    setColorMode: function (colorMode: number): Promise<null> {
       if (Platform.OS === 'android') {
-        return common.setWideColorGamut(colorMode);
+        return common.setColorMode(colorMode);
       }
       return Promise.resolve(null);
+    },
+    getColorMode: function (): Promise<number> {
+      if (Platform.OS === 'android') {
+        return common.getColorMode();
+      }
+      return Promise.resolve(0);
     },
     getKeyHashes: function (): Promise<string[]> {
       if (Platform.OS !== 'android') {

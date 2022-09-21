@@ -1,39 +1,41 @@
 import * as React from 'react';
 
-import {
-  StyleSheet,
-  View,
-  Text,
-  PermissionsAndroid,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, View, Text, Button, Image } from 'react-native';
 import STL from 'react-native-stl-api';
 import { useState } from 'react';
 
-const { ACCESS_FINE_LOCATION } = PermissionsAndroid.PERMISSIONS;
-
 export default function App() {
-  const [isFound, setIsFound] = useState<boolean>(false);
-  const [bleId, setBLEId] = useState<string | undefined>();
-  const [bleType, setBLEType] = useState<number | undefined>();
-  const [result, setResult] = React.useState<string[]>([]);
+  const [colorMode, setColorMode] = useState<string>('');
+  const [keyHashes, setKeyHashes] = useState<string[]>([]);
 
-  const touchHandler = async () => {
+  const updateColorMode = async () => {
     try {
-      const { id, type } = await STL.register.getNearbyDevice();
-      console.log(id, type);
-      setIsFound(true);
-      setBLEType(type);
-      setBLEId(id);
-    } catch (err) {
-      console.log(err);
-      setIsFound(false);
-    }
+      const mode = await STL.common.getColorMode();
+      switch (mode) {
+        case STL.COLOR_MODE.DEFAULT:
+          setColorMode('sRGB');
+          break;
+        case STL.COLOR_MODE.WIDE_COLOR_GAMUT:
+          setColorMode('Display P3');
+          break;
+        case STL.COLOR_MODE.HDR:
+          setColorMode('HDR');
+          break;
+      }
+    } catch (err) {}
+  };
+
+  const changeColorMode = async (mode: number) => {
+    try {
+      await STL.common.setColorMode(mode);
+      await updateColorMode();
+    } catch (err) {}
   };
 
   React.useEffect(() => {
-    PermissionsAndroid.requestMultiple([ACCESS_FINE_LOCATION]).then(() => {});
-    STL.common.getKeyHashes().then((keyHashes) => setResult(keyHashes));
+    changeColorMode(STL.COLOR_MODE.WIDE_COLOR_GAMUT).then(() => false);
+    updateColorMode().then(() => false);
+    STL.common.getKeyHashes().then((hashes) => setKeyHashes(hashes));
   }, []);
 
   return (
@@ -44,25 +46,40 @@ export default function App() {
         {`${STL.common.version} (${STL.common.buildVersion})`}
       </Text>
       <Text>번들 ID: {STL.common.identifier}</Text>
-      <View style={{ marginBottom: 12 }} />
+      <View style={styles.horizontal} />
       <Text>키 해시 리스트</Text>
-      {result.map((keyHash, idx) => (
+      {keyHashes.map((keyHash, idx) => (
         <View key={keyHash}>
           <Text>{`KeyHash-${idx + 1}: ${keyHash}`}</Text>
         </View>
       ))}
-      <View style={{ marginBottom: 12 }} />
-      <View>
-        <TouchableOpacity onPress={touchHandler}>
-          <Text style={{fontSize: 24, lineHeight: 36, color: '#bd93f9'}}>근처 장비 찾기</Text>
-        </TouchableOpacity>
-        {isFound && (
-          <View>
-            <Text>type: {bleType}</Text>
-            <Text>id: {bleId}</Text>
-          </View>
-        )}
+      <View style={styles.horizontal} />
+      <Text>현재 색상: {colorMode}</Text>
+      <Text>색상 모드 설정</Text>
+      <View style={[styles.row]}>
+        <View style={styles.colorGamutButton}>
+          <Button
+            title={'sRGB'}
+            onPress={() => changeColorMode(STL.COLOR_MODE.DEFAULT)}
+          />
+        </View>
+        <View style={styles.colorGamutButton}>
+          <Button
+            title={'Display P3'}
+            onPress={() => changeColorMode(STL.COLOR_MODE.WIDE_COLOR_GAMUT)}
+          />
+        </View>
+        <View style={styles.colorGamutButton}>
+          <Button
+            title={'HDR'}
+            onPress={() => changeColorMode(STL.COLOR_MODE.HDR)}
+          />
+        </View>
       </View>
+      <Image
+        source={require('./assets/Webkit-logo-P3.png')}
+        style={styles.P3Image}
+      />
     </View>
   );
 }
@@ -77,5 +94,22 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     marginVertical: 20,
+  },
+  P3Image: {
+    marginTop: 12,
+    width: 250,
+    height: 250,
+  },
+  horizontal: {
+    marginBottom: 12,
+  },
+  colorGamutButton: {
+    paddingHorizontal: 6,
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  column: {
+    flexDirection: 'column',
   },
 });

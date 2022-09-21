@@ -121,15 +121,34 @@ public class StlApiModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void setWideColorGamut(int colorMode, Promise promise) {
+  public void setColorMode(int colorMode, Promise promise) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       Activity activity = getCurrentActivity();
       if (activity != null) {
-        activity.getWindow().setColorMode(colorMode);
-        promise.resolve(null);
+        activity.runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            activity.getWindow().setColorMode(colorMode);
+            promise.resolve(null);
+          }
+        });
       } else {
         promise.reject(E_ACTIVITY_DOES_NOT_EXIST, "Activity doesn't exist");
       }
+    }
+  }
+
+  @ReactMethod
+  public void getColorMode(Promise promise) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      Activity activity = getCurrentActivity();
+      if (activity != null) {
+        promise.resolve(activity.getWindow().getColorMode());
+      } else {
+        promise.reject(E_ACTIVITY_DOES_NOT_EXIST, "Activity doesn't exist");
+      }
+    } else {
+      promise.resolve(0);
     }
   }
 

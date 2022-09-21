@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import kr.co.smartsignal.api.ble.BluetoothModule;
 import kr.co.smartsignal.api.register.RegisterAPIModule;
 
 public class StlApiPackage implements ReactPackage {
@@ -20,6 +21,7 @@ public class StlApiPackage implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
         modules.add(new StlApiModule(reactContext));
         modules.add(new RegisterAPIModule(reactContext));
+        modules.add(new BluetoothModule(reactContext));
         return modules;
     }
 
