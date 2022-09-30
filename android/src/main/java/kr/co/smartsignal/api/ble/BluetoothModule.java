@@ -62,6 +62,8 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   private Activity mActivity;
   private final CoreBluetooth mCoreBluetooth;
 
+  private Promise mScanPromise;
+
   public BluetoothModule(ReactApplicationContext context) {
     super(context);
     mReactContext = context;
@@ -144,12 +146,14 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void startScan() {
+  public void startScan(Promise promise) {
+    mScanPromise = promise;
     mCoreBluetooth.startScan(new ArrayList<>());
   }
 
   @ReactMethod
-  public void startScanByCompanyId(int companyId) {
+  public void startScanByCompanyId(int companyId, Promise promise) {
+    mScanPromise = promise;
     List<ScanFilter> filters = new ArrayList<>();
     filters.add(new ScanFilter.Builder().setManufacturerData(companyId, new byte[]{}).build());
     mCoreBluetooth.startScan(filters);
@@ -161,7 +165,8 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void stopScan() {
+  public void stopScan(Promise promise) {
+    mScanPromise = promise;
     mCoreBluetooth.stopScan();
   }
 
@@ -254,12 +259,12 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     @SuppressLint("MissingPermission")
     public void startScan(List<ScanFilter> filters) {
       if (mBluetoothAdapter == null) {
-        return;
+        mScanPromise.reject("E_BLUETOOTH_ADAPTER_NOT_INIT", "Unable to initialize BluetoothAdapter.");
       }
 
       if (checkPermissions()) {
         if (mBluetoothAdapter.isDiscovering()) {
-          return;
+          mScanPromise.reject("E_BLUETOOTH_HAS_SCANNED", "Bluetooth already scanned.");
         }
 
         ScanSettings scanSettings = new ScanSettings.Builder()
@@ -269,12 +274,16 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
         mBluetoothAdapter.getBluetoothLeScanner().startScan(filters, scanSettings, mScanCallback);
 
         Toast.makeText(mContext, "블루투스 스캔이 시작되었습니다.", Toast.LENGTH_LONG).show();
+
+        mScanPromise.resolve(null);
+      } else {
+        mScanPromise.reject("E_BLUETOOTH_PERMISSION", "Bluetooth has no permission.");
       }
     }
 
     @SuppressLint("MissingPermission")
     public boolean isDiscovering() {
-      if (mBluetoothAdapter != null && checkPermissions()) {
+      if (mBluetoothAdapter != null ) {
         return mBluetoothAdapter.isDiscovering();
       }
 
@@ -284,12 +293,16 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     @SuppressLint("MissingPermission")
     public void stopScan() {
       if (mBluetoothAdapter == null) {
-        return;
+        mScanPromise.reject("E_BLUETOOTH_ADAPTER_NOT_INIT", "Unable to initialize BluetoothAdapter.");
       }
 
       if (checkPermissions()) {
         mBluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
         Toast.makeText(mContext, "블루투스 스캔이 중지되었습니다.", Toast.LENGTH_LONG).show();
+
+        mScanPromise.resolve(null);
+      } else {
+        mScanPromise.reject("E_BLUETOOTH_PERMISSION", "Bluetooth has no permission.");
       }
     }
 
