@@ -59,10 +59,14 @@ const API = {
       }
       return Promise.resolve(null);
     },
-    startScan: () => ble.startScan,
-    startScanByCompanyId: (companyId: number) =>
-      ble.startScanByCompanyId(companyId),
-    stopScan: () => ble.stopScan,
+    startScan: (): Promise<void> => ble.startScan,
+    startScanByCompanyId: (companyId: number) => {
+      ble.startScanByCompanyId(companyId);
+    },
+    stopScan: (): Promise<void> => ble.stopScan,
+    isDiscovering: (): Promise<boolean> => {
+      return ble.isDiscovering();
+    },
     connect: (identifier: string) => ble.connect(identifier),
     disconnect: () => ble.disconnect,
     emitter: () => bleEmitter,

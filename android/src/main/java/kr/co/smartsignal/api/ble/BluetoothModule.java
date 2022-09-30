@@ -156,6 +156,11 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void isDiscovering(Promise promise) {
+     promise.resolve(mCoreBluetooth.isDiscovering());
+  }
+
+  @ReactMethod
   public void stopScan() {
     mCoreBluetooth.stopScan();
   }
@@ -265,6 +270,15 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
         Toast.makeText(mContext, "블루투스 스캔이 시작되었습니다.", Toast.LENGTH_LONG).show();
       }
+    }
+
+    @SuppressLint("MissingPermission")
+    public boolean isDiscovering() {
+      if (mBluetoothAdapter != null && checkPermissions()) {
+        return mBluetoothAdapter.isDiscovering();
+      }
+
+      return false;
     }
 
     @SuppressLint("MissingPermission")
