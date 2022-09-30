@@ -59,11 +59,11 @@ const API = {
       }
       return Promise.resolve(null);
     },
-    startScan: (): Promise<void> => ble.startScan,
+    startScan: (): void => ble.startScan,
     startScanByCompanyId: (companyId: number) => {
       ble.startScanByCompanyId(companyId);
     },
-    stopScan: (): Promise<void> => ble.stopScan,
+    stopScan: (): void => ble.stopScan,
     isDiscovering: (): Promise<boolean> => {
       return ble.isDiscovering();
     },
