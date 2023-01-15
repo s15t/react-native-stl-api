@@ -165,6 +165,16 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void checkAdvertisePermission(Promise promise) {
+    promise.resolve(mCoreBluetooth.checkAdvertisePermissions());
+  }
+
+  @ReactMethod
+  public void checkScanPermission(Promise promise) {
+    promise.resolve(mCoreBluetooth.checkPermissions());
+  }
+
+  @ReactMethod
   public void stopScan(Promise promise) {
     mScanPromise = promise;
     mCoreBluetooth.stopScan();
@@ -429,7 +439,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       }
     }
 
-    private boolean checkAdvertisePermissions() {
+    public boolean checkAdvertisePermissions() {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         boolean bluetoothScan = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_ADVERTISE) == PackageManager.PERMISSION_GRANTED;
         boolean bluetoothConnect = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
@@ -439,7 +449,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       }
     }
 
-    private boolean checkPermissions() {
+    public boolean checkPermissions() {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         boolean bluetoothScan = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
         boolean bluetoothConnect = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;

@@ -59,17 +59,29 @@ const API = {
       }
       return Promise.resolve(null);
     },
-    startScan: (): Promise<void> => ble.startScan,
+    startScan: (): Promise<void> => ble.startScan(),
     startScanByCompanyId: (companyId: number): Promise<void> => {
       return ble.startScanByCompanyId(companyId);
     },
-    stopScan: (): Promise<void> => ble.stopScan,
+    stopScan: (): Promise<void> => ble.stopScan(),
+    checkAdvertisePermission: (): Promise<boolean> => {
+      if (Platform.OS === 'android') {
+        return ble.checkAdvertisePermission();
+      }
+      return Promise.resolve(true);
+    },
+    checkScanPermissions: (): Promise<boolean> => {
+      if (Platform.OS === 'android') {
+        return ble.checkScanPermissions();
+      }
+      return Promise.resolve(true);
+    },
     isDiscovering: (): Promise<boolean> => {
       return ble.isDiscovering();
     },
     connect: (identifier: string) => ble.connect(identifier),
     disconnect: () => ble.disconnect,
-    emitter: () => bleEmitter,
+    emitter: bleEmitter,
     eventType: {
       ON_READ_CHARACTERISTIC: 'CharacteristicRead',
       ON_READ_DESCRIPTOR: 'DescriptorRead',
