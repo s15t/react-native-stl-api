@@ -70,9 +70,9 @@ const API = {
       }
       return Promise.resolve(true);
     },
-    checkScanPermissions: (): Promise<boolean> => {
+    checkScanPermission: (): Promise<boolean> => {
       if (Platform.OS === 'android') {
-        return ble.checkScanPermissions();
+        return ble.checkScanPermission();
       }
       return Promise.resolve(true);
     },

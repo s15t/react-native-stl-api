@@ -148,6 +148,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void startScan(Promise promise) {
     mScanPromise = promise;
+    mCoreBluetooth.setCompanyId(Integer.MIN_VALUE);
     mCoreBluetooth.startScan(new ArrayList<>());
   }
 
@@ -156,6 +157,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     mScanPromise = promise;
     List<ScanFilter> filters = new ArrayList<>();
     filters.add(new ScanFilter.Builder().setManufacturerData(companyId, new byte[]{}).build());
+    mCoreBluetooth.setCompanyId(companyId);
     mCoreBluetooth.startScan(filters);
   }
 
@@ -243,13 +245,16 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
     private BluetoothAdapter mBluetoothAdapter;
     private final ScanCallback mScanCallback;
-    private final Map<UUID, BluetoothDevice> devices;
+    private final Map<String, BluetoothDevice> devices;
 
     private BluetoothGatt mGatt;
 
+    private int companyId;
+
     CoreBluetooth() {
       BluetoothManager mBluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
-      devices = Collections.emptyMap();
+      devices = new HashMap<>();
+      companyId = Integer.MIN_VALUE;
       mScanCallback = createBluetoothScanCallback();
 
       if (mBluetoothManager != null) {
@@ -262,8 +267,12 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       }
     }
 
+    public void setCompanyId(int companyId) {
+      this.companyId = companyId;
+    }
+
     public BluetoothDevice getDevice(String identifier) {
-      return devices.get(UUID.fromString(identifier));
+      return devices.get(identifier);
     }
 
     @SuppressLint("MissingPermission")
@@ -309,6 +318,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       if (checkPermissions()) {
         mBluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
         Toast.makeText(mContext, "블루투스 스캔이 중지되었습니다.", Toast.LENGTH_LONG).show();
+        devices.clear();
 
         mScanPromise.resolve(null);
       } else {
@@ -441,9 +451,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
     public boolean checkAdvertisePermissions() {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        boolean bluetoothScan = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_ADVERTISE) == PackageManager.PERMISSION_GRANTED;
-        boolean bluetoothConnect = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
-        return bluetoothScan && bluetoothConnect;
+        return ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_ADVERTISE) == PackageManager.PERMISSION_GRANTED;
       } else {
         return true;
       }
@@ -451,9 +459,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
     public boolean checkPermissions() {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        boolean bluetoothScan = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
-        boolean bluetoothConnect = ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
-        return bluetoothScan && bluetoothConnect;
+        return ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
       } else {
         return ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
       }
@@ -467,28 +473,31 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
           ScanRecord record = result.getScanRecord();
           WritableMap params = Arguments.createMap();
           UUID identifier = UUID.randomUUID();
-          byte[] bytes = record.getManufacturerSpecificData(0x0AB9);
+          String deviceName = record.getDeviceName();
+          int RSSI = result.getRssi();
+          int TxPowerLevel = record.getTxPowerLevel() == Integer.MIN_VALUE ? 0 : record.getTxPowerLevel();
 
           boolean is_duplicated = false;
-          for (Map.Entry<UUID, BluetoothDevice> entry: devices.entrySet()) {
+          for (Map.Entry<String, BluetoothDevice> entry: devices.entrySet()) {
             if(entry.getValue().getAddress().equals(newDevice.getAddress())) {
               is_duplicated = true;
-              identifier = entry.getKey();
+              identifier = UUID.fromString(entry.getKey());
             }
           }
-
           if (!is_duplicated) {
-            devices.put(identifier, newDevice);
+            devices.put(identifier.toString(), newDevice);
           }
 
           params.putString("identifier", identifier.toString());
-          params.putString("name", record.getDeviceName());
-          params.putInt("RSSI", result.getRssi());
-          params.putInt("TxPowerLevel", record.getTxPowerLevel());
-          if (bytes != null) {
-            params.putString("ManufacturerSpecificData", Base64.encodeToString(bytes, Base64.DEFAULT));
-          } else {
-            params.putNull("ManufacturerSpecificData");
+          params.putString("name", deviceName);
+          params.putInt("RSSI", RSSI);
+          params.putInt("TxPowerLevel", TxPowerLevel);
+          params.putNull("ManufacturerSpecificData");
+          if (companyId != Integer.MIN_VALUE) {
+            byte[] bytes = record.getManufacturerSpecificData(companyId);
+            if (bytes != null) {
+              params.putString("ManufacturerSpecificData", Base64.encodeToString(bytes, Base64.DEFAULT));
+            }
           }
 
           // emit event
