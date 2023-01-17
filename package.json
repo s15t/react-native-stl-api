@@ -1,5 +1,5 @@
 {
-  "name": "react-native-stl-api",
+  "name": "@stl1/react-native-stl-api",
   "version": "1.0.0",
   "description": "Common API STL uses",
   "main": "lib/commonjs/index",
@@ -37,7 +37,7 @@
     "android"
   ],
   "repository": "https://github.com/s15t/react-native-stl-api",
-  "author": "Seongwoo Park <my@5corpion.dev> (https://github.com/scorpion1201)",
+  "author": "STL <stl@stl1.co.kr>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/s15t/react-native-stl-api/issues"

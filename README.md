@@ -5,7 +5,11 @@ Common API that STL uses.
 ## Installation
 
 ```sh
-npm install --save s15t/react-native-stl-api#main
+yarn add @stl1/react-native-stl-api
+```
+or
+```sh
+npm i @stl1/react-native-stl-api
 ```
 
 ## Usage
