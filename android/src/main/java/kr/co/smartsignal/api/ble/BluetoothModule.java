@@ -292,7 +292,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
         mBluetoothAdapter.getBluetoothLeScanner().startScan(filters, scanSettings, mScanCallback);
 
-        Toast.makeText(mContext, "블루투스 스캔이 시작되었습니다.", Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, "블루투스 스캔이 시작되었습니다.", Toast.LENGTH_SHORT).show();
 
         mScanPromise.resolve(null);
       } else {
@@ -317,7 +317,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
       if (checkPermissions()) {
         mBluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
-        Toast.makeText(mContext, "블루투스 스캔이 중지되었습니다.", Toast.LENGTH_LONG).show();
+        Toast.makeText(mContext, "블루투스 스캔이 중지되었습니다.", Toast.LENGTH_SHORT).show();
         devices.clear();
 
         mScanPromise.resolve(null);
