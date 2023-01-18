@@ -1,6 +1,6 @@
 {
   "name": "@stl1/react-native-stl-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Common API STL uses",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -15,6 +15,7 @@
     "cpp",
     "react-native-stl-api.podspec",
     "!lib/typescript/example",
+    "!android/local.properties",
     "!android/build",
     "!ios/build",
     "!**/__tests__",
