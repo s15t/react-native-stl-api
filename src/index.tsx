@@ -49,6 +49,12 @@ type BluetoothGattDescriptorProps = {
   PERMISSION: { [key: string]: number };
 };
 
+type BluetoothGattServicesProps = {
+  serviceIds: string[];
+  characteristics: string[];
+  descriptors: string[];
+};
+
 type BluetoothGattReadCharacteristicProps = {
   uuid: string;
   data: string;
@@ -107,6 +113,9 @@ const API = {
     },
     connect: (identifier: string) => ble.connect(identifier),
     disconnect: () => ble.disconnect,
+    discoverServices: (): Promise<BluetoothGattServicesProps> => {
+      return ble.discoverServices();
+    },
     writeCharacteristic: (
       serviceId: string,
       uuid: string,

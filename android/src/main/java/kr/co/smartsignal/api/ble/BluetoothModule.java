@@ -66,6 +66,8 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
   private Promise mScanPromise;
 
+  private Promise mDiscoverServicesPromise;
+
   private Promise mReadCharacteristicPromise;
   private Promise mReadDescriptorPromise;
   private Promise mWriteCharacteristicPromise;
@@ -197,6 +199,12 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void disconnect() {
     mCoreBluetooth.disconnect();
+  }
+
+  @ReactMethod
+  public void discoverServices(Promise promise) {
+    mDiscoverServicesPromise = promise;
+    mCoreBluetooth.discoverServices();
   }
 
   @ReactMethod
@@ -415,7 +423,10 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
             params.putArray("serviceIds", services);
             params.putArray("characteristics", characteristics);
             params.putArray("descriptors", descriptors);
+            mDiscoverServicesPromise.resolve(params);
             sendEvent("ServicesDiscovered", params);
+          } else {
+            mDiscoverServicesPromise.reject("E_GATT_ERROR", "Cannot be found service(s).");
           }
         }
 
@@ -487,6 +498,13 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
         mGatt.disconnect();
         mGatt = null;
         sendEvent("Disconnected", null);
+      }
+    }
+
+    @SuppressLint("MissingPermission")
+    public void discoverServices() {
+      if (checkPermissions() && mGatt != null) {
+        mGatt.discoverServices();
       }
     }
 
