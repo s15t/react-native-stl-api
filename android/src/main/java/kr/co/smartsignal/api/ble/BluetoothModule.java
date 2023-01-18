@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.ScanCallback;
@@ -36,6 +37,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -63,6 +65,11 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   private final CoreBluetooth mCoreBluetooth;
 
   private Promise mScanPromise;
+
+  private Promise mReadCharacteristicPromise;
+  private Promise mReadDescriptorPromise;
+  private Promise mWriteCharacteristicPromise;
+  private Promise mWriteDescriptorPromise;
 
   public BluetoothModule(ReactApplicationContext context) {
     super(context);
@@ -193,23 +200,36 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void writeCharacteristic(String uuid, String data, int properties, int permissions) {
-    mCoreBluetooth.writeCharacteristic(UUID.fromString(uuid), properties, permissions, Base64.decode(data, Base64.DEFAULT));
+  public void writeCharacteristic(String serviceId, String uuid, String data, Promise promise) {
+    mWriteCharacteristicPromise = promise;
+    mCoreBluetooth.writeCharacteristic(UUID.fromString(serviceId), UUID.fromString(uuid), Base64.decode(data, Base64.DEFAULT));
   }
 
   @ReactMethod
-  public void readCharacteristic(String uuid, int properties, int permissions) {
-    mCoreBluetooth.readCharacteristic(UUID.fromString(uuid), properties, permissions);
+  public void readCharacteristic(String serviceId, String uuid, Promise promise) {
+    mReadCharacteristicPromise = promise;
+    mCoreBluetooth.readCharacteristic(UUID.fromString(serviceId), UUID.fromString(uuid));
   }
 
   @ReactMethod
-  public void writeDescriptor(String uuid, String data, int permissions) {
-    mCoreBluetooth.writeDescriptor(UUID.fromString(uuid), permissions, Base64.decode(data, Base64.DEFAULT));
+  public void writeDescriptor(String serviceId, String characteristicId, String uuid, String data, Promise promise) {
+    mWriteDescriptorPromise = promise;
+    mCoreBluetooth.writeDescriptor(
+      UUID.fromString(serviceId),
+      UUID.fromString(characteristicId),
+      UUID.fromString(uuid),
+      Base64.decode(data, Base64.DEFAULT)
+    );
   }
 
   @ReactMethod
-  public void readDescriptor(String uuid, int permissions) {
-    mCoreBluetooth.readDescriptor(UUID.fromString(uuid), permissions);
+  public void readDescriptor(String serviceId, String characteristicId, String uuid, Promise promise) {
+    mReadDescriptorPromise = promise;
+    mCoreBluetooth.readDescriptor(
+      UUID.fromString(serviceId),
+      UUID.fromString(characteristicId),
+      UUID.fromString(uuid)
+    );
   }
 
   @ReactMethod
@@ -364,13 +384,38 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
               break;
             case BluetoothProfile.STATE_CONNECTED:
               if (status == BluetoothGatt.GATT_SUCCESS) {
-                sendEvent("Connected", null);
+                gatt.discoverServices();
                 mGatt = gatt;
+                sendEvent("Connected", null);
               } else {
                 sendEvent("Disconnected", null);
                 mGatt = null;
               }
               break;
+          }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+          super.onServicesDiscovered(gatt, status);
+          if (status == BluetoothGatt.GATT_SUCCESS) {
+            WritableMap params = Arguments.createMap();
+            WritableArray services = Arguments.createArray();
+            WritableArray characteristics = Arguments.createArray();
+            WritableArray descriptors = Arguments.createArray();
+            for (BluetoothGattService service: gatt.getServices()) {
+              services.pushString(service.getUuid().toString());
+              for (BluetoothGattCharacteristic characteristic: service.getCharacteristics()) {
+                characteristics.pushString(characteristic.getUuid().toString());
+                for (BluetoothGattDescriptor descriptor: characteristic.getDescriptors()) {
+                  descriptors.pushString(descriptor.getUuid().toString());
+                }
+              }
+            }
+            params.putArray("serviceIds", services);
+            params.putArray("characteristics", characteristics);
+            params.putArray("descriptors", descriptors);
+            sendEvent("ServicesDiscovered", params);
           }
         }
 
@@ -383,9 +428,32 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
               descriptors.putString(descriptor.getUuid().toString(), Base64.encodeToString(descriptor.getValue(), Base64.DEFAULT));
             }
             params.putString("uuid", characteristic.getUuid().toString());
+            params.putString("data", Base64.encodeToString(characteristic.getValue(), Base64.DEFAULT));
             params.putMap("descriptors", descriptors);
+            mReadCharacteristicPromise.resolve(params);
             sendEvent("CharacteristicRead", params);
+          } else {
+            mReadCharacteristicPromise.reject("E_GATT_ERROR", "Cannot be read characteristic.");
           }
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+          super.onCharacteristicWrite(gatt, characteristic, status);
+          if (status == BluetoothGatt.GATT_SUCCESS) {
+            mWriteCharacteristicPromise.resolve(null);
+          } else {
+            mWriteCharacteristicPromise.reject("E_GATT_ERROR", "Cannot be written characteristic.");
+          }
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+          super.onCharacteristicChanged(gatt, characteristic);
+          WritableMap params = Arguments.createMap();
+          params.putString("uuid", characteristic.getUuid().toString());
+          params.putString("data", Base64.encodeToString(characteristic.getValue(), Base64.DEFAULT));
+          sendEvent("CharacteristicChanged", params);
         }
 
         @Override
@@ -394,7 +462,20 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
             WritableMap params = Arguments.createMap();
             params.putString("uuid", descriptor.getUuid().toString());
             params.putString("data", Base64.encodeToString(descriptor.getValue(), Base64.DEFAULT));
+            mReadDescriptorPromise.resolve(params);
             sendEvent("DescriptorRead", params);
+          } else {
+            mReadDescriptorPromise.reject("E_GATT_ERROR", "Cannot be read descriptor.");
+          }
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+          super.onDescriptorWrite(gatt, descriptor, status);
+          if (status == BluetoothGatt.GATT_SUCCESS) {
+            mWriteDescriptorPromise.resolve(null);
+          } else {
+            mWriteDescriptorPromise.reject("E_GATT_ERROR", "Cannot be written descriptor.");
           }
         }
       });
@@ -410,34 +491,34 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     }
 
     @SuppressLint("MissingPermission")
-    public void writeCharacteristic(UUID uuid, int properties, int permissions, byte[] data) {
+    public void writeCharacteristic(UUID serviceId, UUID uuid, byte[] data) {
       if (checkPermissions() && mGatt != null) {
-        BluetoothGattCharacteristic characteristic = new BluetoothGattCharacteristic(uuid, properties, permissions);
+        BluetoothGattCharacteristic characteristic = mGatt.getService(serviceId).getCharacteristic(uuid);
         characteristic.setValue(data);
         mGatt.writeCharacteristic(characteristic);
       }
     }
 
     @SuppressLint("MissingPermission")
-    public void readCharacteristic(UUID uuid, int properties, int permissions) {
+    public void readCharacteristic(UUID serviceId, UUID uuid) {
       if (checkPermissions() && mGatt != null) {
-        mGatt.readCharacteristic(new BluetoothGattCharacteristic(uuid, properties, permissions));
+        mGatt.readCharacteristic(mGatt.getService(serviceId).getCharacteristic(uuid));
       }
     }
 
     @SuppressLint("MissingPermission")
-    public void writeDescriptor(UUID uuid, int permissions, byte[] data) {
+    public void writeDescriptor(UUID serviceId, UUID characteristicId, UUID uuid, byte[] data) {
       if (checkPermissions() && mGatt != null) {
-        BluetoothGattDescriptor descriptor = new BluetoothGattDescriptor(uuid, permissions);
+        BluetoothGattDescriptor descriptor = mGatt.getService(serviceId).getCharacteristic(characteristicId).getDescriptor(uuid);
         descriptor.setValue(data);
         mGatt.writeDescriptor(descriptor);
       }
     }
 
     @SuppressLint("MissingPermission")
-    public void readDescriptor(UUID uuid, int permissions) {
+    public void readDescriptor(UUID serviceId, UUID characteristicId, UUID uuid) {
       if (checkPermissions() && mGatt != null) {
-        mGatt.readDescriptor(new BluetoothGattDescriptor(uuid, permissions));
+        mGatt.readDescriptor(mGatt.getService(serviceId).getCharacteristic(characteristicId).getDescriptor(uuid));
       }
     }
 

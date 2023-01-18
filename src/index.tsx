@@ -49,6 +49,17 @@ type BluetoothGattDescriptorProps = {
   PERMISSION: { [key: string]: number };
 };
 
+type BluetoothGattReadCharacteristicProps = {
+  uuid: string;
+  data: string;
+  descriptors: { [id: string]: string };
+};
+
+type BluetoothGattReadDescriptorProps = {
+  uuid: string;
+  data: string;
+};
+
 const BluetoothGattCharacteristic: BluetoothGattCharacteristicProps =
   ble.BluetoothGattCharacteristic;
 
@@ -97,31 +108,40 @@ const API = {
     connect: (identifier: string) => ble.connect(identifier),
     disconnect: () => ble.disconnect,
     writeCharacteristic: (
+      serviceId: string,
       uuid: string,
-      data: string,
-      properties: number,
-      permissions: number
-    ) => {
-      return ble.writeCharacteristic(uuid, data, properties, permissions);
+      data: string
+    ): Promise<void> => {
+      return ble.writeCharacteristic(serviceId, uuid, data);
     },
     readCharacteristic: (
+      serviceId: string,
+      uuid: string
+    ): Promise<BluetoothGattReadCharacteristicProps> => {
+      return ble.readCharacteristic(serviceId, uuid);
+    },
+    writeDescriptor: (
+      serviceId: string,
+      characteristicId: string,
       uuid: string,
-      properties: number,
-      permissions: number
-    ) => {
-      return ble.readCharacteristic(uuid, properties, permissions);
+      data: string
+    ): Promise<void> => {
+      return ble.writeDescriptor(serviceId, characteristicId, uuid, data);
     },
-    writeDescriptor: (uuid: string, data: string, permissions: number) => {
-      return ble.writeDescriptor(uuid, data, permissions);
-    },
-    readDescriptor: (uuid: string, permissions: number) => {
-      return ble.readDescriptor(uuid, permissions);
+    readDescriptor: (
+      serviceId: string,
+      characteristicId: string,
+      uuid: string
+    ): Promise<BluetoothGattReadDescriptorProps> => {
+      return ble.readDescriptor(serviceId, characteristicId, uuid);
     },
     emitter: bleEmitter,
     eventType: {
       ON_CONNECTED: 'Connected',
       ON_DISCONNECTED: 'Disconnected',
+      ON_SERVICESDISCOVERED: 'ServicesDiscovered',
       ON_READ_CHARACTERISTIC: 'CharacteristicRead',
+      ON_CHANGE_CHARACTERISTIC: 'CharacteristicChanged',
       ON_READ_DESCRIPTOR: 'DescriptorRead',
       ON_FOUND: 'FoundBLEDevice',
       ...Platform.select({
