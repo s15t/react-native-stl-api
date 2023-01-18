@@ -193,6 +193,26 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void writeCharacteristic(String uuid, String data, int properties, int permissions) {
+    mCoreBluetooth.writeCharacteristic(UUID.fromString(uuid), properties, permissions, Base64.decode(data, Base64.DEFAULT));
+  }
+
+  @ReactMethod
+  public void readCharacteristic(String uuid, int properties, int permissions) {
+    mCoreBluetooth.readCharacteristic(UUID.fromString(uuid), properties, permissions);
+  }
+
+  @ReactMethod
+  public void writeDescriptor(String uuid, String data, int permissions) {
+    mCoreBluetooth.writeDescriptor(UUID.fromString(uuid), permissions, Base64.decode(data, Base64.DEFAULT));
+  }
+
+  @ReactMethod
+  public void readDescriptor(String uuid, int permissions) {
+    mCoreBluetooth.readDescriptor(UUID.fromString(uuid), permissions);
+  }
+
+  @ReactMethod
   public void requestAdvertisePermission(Promise promise) {
     if (isCurrentActivity(promise)) {
       mCoreBluetooth.requestAdvertisePermission();
@@ -338,13 +358,16 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
           switch (newState) {
             case BluetoothProfile.STATE_DISCONNECTED:
               if (status == BluetoothGatt.GATT_SUCCESS) {
+                sendEvent("Disconnected", null);
                 mGatt = null;
               }
               break;
             case BluetoothProfile.STATE_CONNECTED:
               if (status == BluetoothGatt.GATT_SUCCESS) {
+                sendEvent("Connected", null);
                 mGatt = gatt;
               } else {
+                sendEvent("Disconnected", null);
                 mGatt = null;
               }
               break;
@@ -382,38 +405,39 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       if (checkPermissions() && mGatt != null) {
         mGatt.disconnect();
         mGatt = null;
+        sendEvent("Disconnected", null);
       }
     }
 
     @SuppressLint("MissingPermission")
-    public void writeCharacteristic(UUID uuid, int properties, byte[] data) {
+    public void writeCharacteristic(UUID uuid, int properties, int permissions, byte[] data) {
       if (checkPermissions() && mGatt != null) {
-        BluetoothGattCharacteristic characteristic = new BluetoothGattCharacteristic(uuid, properties, BluetoothGattCharacteristic.PERMISSION_WRITE);
+        BluetoothGattCharacteristic characteristic = new BluetoothGattCharacteristic(uuid, properties, permissions);
         characteristic.setValue(data);
         mGatt.writeCharacteristic(characteristic);
       }
     }
 
     @SuppressLint("MissingPermission")
-    public void readCharacteristic(UUID uuid, int properties) {
+    public void readCharacteristic(UUID uuid, int properties, int permissions) {
       if (checkPermissions() && mGatt != null) {
-        mGatt.readCharacteristic(new BluetoothGattCharacteristic(uuid, properties, BluetoothGattCharacteristic.PERMISSION_READ));
+        mGatt.readCharacteristic(new BluetoothGattCharacteristic(uuid, properties, permissions));
       }
     }
 
     @SuppressLint("MissingPermission")
-    public void writeDescriptor(UUID uuid, byte[] data) {
+    public void writeDescriptor(UUID uuid, int permissions, byte[] data) {
       if (checkPermissions() && mGatt != null) {
-        BluetoothGattDescriptor descriptor = new BluetoothGattDescriptor(uuid, BluetoothGattDescriptor.PERMISSION_WRITE);
+        BluetoothGattDescriptor descriptor = new BluetoothGattDescriptor(uuid, permissions);
         descriptor.setValue(data);
         mGatt.writeDescriptor(descriptor);
       }
     }
 
     @SuppressLint("MissingPermission")
-    public void readDescriptor(UUID uuid) {
+    public void readDescriptor(UUID uuid, int permissions) {
       if (checkPermissions() && mGatt != null) {
-        mGatt.readDescriptor(new BluetoothGattDescriptor(uuid, BluetoothGattDescriptor.PERMISSION_READ));
+        mGatt.readDescriptor(new BluetoothGattDescriptor(uuid, permissions));
       }
     }
 
