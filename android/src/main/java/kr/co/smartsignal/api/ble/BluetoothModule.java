@@ -392,7 +392,6 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
               break;
             case BluetoothProfile.STATE_CONNECTED:
               if (status == BluetoothGatt.GATT_SUCCESS) {
-                gatt.discoverServices();
                 mGatt = gatt;
                 sendEvent("Connected", null);
               } else {
@@ -423,39 +422,48 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
             params.putArray("serviceIds", services);
             params.putArray("characteristics", characteristics);
             params.putArray("descriptors", descriptors);
-            mDiscoverServicesPromise.resolve(params);
-            sendEvent("ServicesDiscovered", params);
+            if (mDiscoverServicesPromise != null) {
+              mDiscoverServicesPromise.resolve(params);
+            }
           } else {
-            mDiscoverServicesPromise.reject("E_GATT_ERROR", "Cannot be found service(s).");
+            if (mDiscoverServicesPromise != null) {
+              mDiscoverServicesPromise.reject("E_GATT_ERROR", "Cannot be found service(s).");
+            }
           }
+          mDiscoverServicesPromise = null;
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
           if (status == BluetoothGatt.GATT_SUCCESS) {
             WritableMap params = Arguments.createMap();
-            WritableMap descriptors = Arguments.createMap();
-            for (BluetoothGattDescriptor descriptor: characteristic.getDescriptors()) {
-              descriptors.putString(descriptor.getUuid().toString(), Base64.encodeToString(descriptor.getValue(), Base64.DEFAULT));
-            }
             params.putString("uuid", characteristic.getUuid().toString());
             params.putString("data", Base64.encodeToString(characteristic.getValue(), Base64.DEFAULT));
-            params.putMap("descriptors", descriptors);
-            mReadCharacteristicPromise.resolve(params);
-            sendEvent("CharacteristicRead", params);
+            params.putNull("descriptors");
+            if (mReadCharacteristicPromise != null) {
+              mReadCharacteristicPromise.resolve(params);
+            }
           } else {
-            mReadCharacteristicPromise.reject("E_GATT_ERROR", "Cannot be read characteristic.");
+            if (mReadCharacteristicPromise != null) {
+              mReadCharacteristicPromise.reject("E_GATT_ERROR", "Cannot be read characteristic.");
+            }
           }
+          mReadCharacteristicPromise = null;
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
           super.onCharacteristicWrite(gatt, characteristic, status);
           if (status == BluetoothGatt.GATT_SUCCESS) {
-            mWriteCharacteristicPromise.resolve(null);
+            if (mWriteCharacteristicPromise != null) {
+              mWriteCharacteristicPromise.resolve(null);
+            }
           } else {
-            mWriteCharacteristicPromise.reject("E_GATT_ERROR", "Cannot be written characteristic.");
+            if (mWriteCharacteristicPromise != null) {
+              mWriteCharacteristicPromise.reject("E_GATT_ERROR", "Cannot be written characteristic.");
+            }
           }
+          mWriteCharacteristicPromise = null;
         }
 
         @Override
@@ -473,21 +481,30 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
             WritableMap params = Arguments.createMap();
             params.putString("uuid", descriptor.getUuid().toString());
             params.putString("data", Base64.encodeToString(descriptor.getValue(), Base64.DEFAULT));
-            mReadDescriptorPromise.resolve(params);
-            sendEvent("DescriptorRead", params);
+            if (mReadDescriptorPromise != null) {
+              mReadDescriptorPromise.resolve(params);
+            }
           } else {
-            mReadDescriptorPromise.reject("E_GATT_ERROR", "Cannot be read descriptor.");
+            if (mReadDescriptorPromise != null) {
+              mReadDescriptorPromise.reject("E_GATT_ERROR", "Cannot be read descriptor.");
+            }
           }
+          mReadDescriptorPromise = null;
         }
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
           super.onDescriptorWrite(gatt, descriptor, status);
           if (status == BluetoothGatt.GATT_SUCCESS) {
-            mWriteDescriptorPromise.resolve(null);
+            if (mWriteDescriptorPromise != null) {
+              mWriteDescriptorPromise.resolve(null);
+            }
           } else {
-            mWriteDescriptorPromise.reject("E_GATT_ERROR", "Cannot be written descriptor.");
+            if (mWriteDescriptorPromise != null) {
+              mWriteDescriptorPromise.reject("E_GATT_ERROR", "Cannot be written descriptor.");
+            }
           }
+          mWriteDescriptorPromise = null;
         }
       });
     }
