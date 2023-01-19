@@ -37,6 +37,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
@@ -157,16 +158,22 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void startScan(Promise promise) {
     mScanPromise = promise;
-    mCoreBluetooth.setCompanyId(Integer.MIN_VALUE);
+    mCoreBluetooth.setCompanyIds(new ArrayList<>());
     mCoreBluetooth.startScan(new ArrayList<>());
   }
 
   @ReactMethod
-  public void startScanByCompanyId(int companyId, Promise promise) {
+  public void startScanByCompanyId(ReadableArray companyIds, Promise promise) {
     mScanPromise = promise;
+    List<Integer> listCompanyId = new ArrayList<>();
     List<ScanFilter> filters = new ArrayList<>();
-    filters.add(new ScanFilter.Builder().setManufacturerData(companyId, new byte[]{}).build());
-    mCoreBluetooth.setCompanyId(companyId);
+    int p = 0;
+    while (p < companyIds.size()) {
+      int companyId = companyIds.getInt(p++);
+      listCompanyId.add(companyId);
+      filters.add(new ScanFilter.Builder().setManufacturerData(companyId, new byte[]{}).build());
+    }
+    mCoreBluetooth.setCompanyIds(listCompanyId);
     mCoreBluetooth.startScan(filters);
   }
 
@@ -297,12 +304,12 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
 
     private BluetoothGatt mGatt;
 
-    private int companyId;
+    private List<Integer> companyIds;
 
     CoreBluetooth() {
       BluetoothManager mBluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
       devices = new HashMap<>();
-      companyId = Integer.MIN_VALUE;
+      companyIds = new ArrayList<>();
       mScanCallback = createBluetoothScanCallback();
 
       if (mBluetoothManager != null) {
@@ -315,8 +322,8 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       }
     }
 
-    public void setCompanyId(int companyId) {
-      this.companyId = companyId;
+    public void setCompanyIds(List<Integer> companyIds) {
+      this.companyIds = companyIds;
     }
 
     public BluetoothDevice getDevice(String identifier) {
@@ -633,7 +640,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
           params.putInt("RSSI", RSSI);
           params.putInt("TxPowerLevel", TxPowerLevel);
           params.putNull("ManufacturerSpecificData");
-          if (companyId != Integer.MIN_VALUE) {
+          for (Integer companyId: companyIds) {
             byte[] bytes = record.getManufacturerSpecificData(companyId);
             if (bytes != null) {
               params.putString("ManufacturerSpecificData", Base64.encodeToString(bytes, Base64.DEFAULT));

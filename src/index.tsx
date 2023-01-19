@@ -92,8 +92,8 @@ const API = {
       return Promise.resolve(null);
     },
     startScan: (): Promise<void> => ble.startScan(),
-    startScanByCompanyId: (companyId: number): Promise<void> => {
-      return ble.startScanByCompanyId(companyId);
+    startScanByCompanyId: (companyIds: number[]): Promise<void> => {
+      return ble.startScanByCompanyId(companyIds);
     },
     stopScan: (): Promise<void> => ble.stopScan(),
     checkAdvertisePermission: (): Promise<boolean> => {
