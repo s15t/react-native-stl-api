@@ -521,7 +521,6 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       if (checkPermissions() && mGatt != null) {
         mGatt.disconnect();
         mGatt = null;
-        sendEvent("Disconnected", null);
       }
     }
 
