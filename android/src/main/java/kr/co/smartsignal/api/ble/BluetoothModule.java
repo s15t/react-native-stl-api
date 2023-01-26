@@ -537,6 +537,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       if (checkPermissions() && mGatt != null) {
         BluetoothGattCharacteristic characteristic = mGatt.getService(serviceId).getCharacteristic(uuid);
         characteristic.setValue(data);
+        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         mGatt.writeCharacteristic(characteristic);
       }
     }
