@@ -112,7 +112,7 @@ const API = {
       return ble.isDiscovering();
     },
     connect: (identifier: string) => ble.connect(identifier),
-    disconnect: () => ble.disconnect,
+    disconnect: () => ble.disconnect(),
     discoverServices: (): Promise<BluetoothGattServicesProps> => {
       return ble.discoverServices();
     },
