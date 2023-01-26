@@ -630,6 +630,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
             if(entry.getValue().getAddress().equals(newDevice.getAddress())) {
               is_duplicated = true;
               identifier = UUID.fromString(entry.getKey());
+              break;
             }
           }
           if (!is_duplicated) {
