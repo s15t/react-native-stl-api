@@ -1,0 +1,5 @@
+{
+  "git": {
+    "commitMessage": "[${version}] Bump version numbers"
+  }
+}
