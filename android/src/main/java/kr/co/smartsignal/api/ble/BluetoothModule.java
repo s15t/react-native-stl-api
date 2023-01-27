@@ -73,6 +73,7 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   private Promise mReadDescriptorPromise;
   private Promise mWriteCharacteristicPromise;
   private Promise mWriteDescriptorPromise;
+  private Promise mRequestMtuPromise;
 
   public BluetoothModule(ReactApplicationContext context) {
     super(context);
@@ -245,6 +246,12 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
       UUID.fromString(characteristicId),
       UUID.fromString(uuid)
     );
+  }
+
+  @ReactMethod
+  public void requestMTU(int mtu, Promise promise) {
+    mRequestMtuPromise = promise;
+    mCoreBluetooth.requestMTU(mtu);
   }
 
   @ReactMethod
@@ -513,6 +520,21 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
           }
           mWriteDescriptorPromise = null;
         }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+          super.onMtuChanged(gatt, mtu, status);
+          if (status == BluetoothGatt.GATT_SUCCESS) {
+            if (mRequestMtuPromise != null) {
+              mRequestMtuPromise.resolve(mtu);
+            }
+          } else {
+            if (mRequestMtuPromise != null) {
+              mRequestMtuPromise.reject("E_GATT_ERROR", "Cannot be changed MTU.");
+            }
+          }
+          mRequestMtuPromise = null;
+        }
       });
     }
 
@@ -561,6 +583,13 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     public void readDescriptor(UUID serviceId, UUID characteristicId, UUID uuid) {
       if (checkPermissions() && mGatt != null) {
         mGatt.readDescriptor(mGatt.getService(serviceId).getCharacteristic(characteristicId).getDescriptor(uuid));
+      }
+    }
+
+    @SuppressLint("MissingPermission")
+    public void requestMTU(int mtu) {
+      if (checkPermissions() && mGatt != null) {
+        mGatt.requestMtu(mtu);
       }
     }
 

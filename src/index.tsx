@@ -144,6 +144,9 @@ const API = {
     ): Promise<BluetoothGattReadDescriptorProps> => {
       return ble.readDescriptor(serviceId, characteristicId, uuid);
     },
+    requestMTU: (mtu: number): Promise<number> => {
+      return ble.requestMTU(mtu);
+    },
     emitter: bleEmitter,
     eventType: {
       ON_CONNECTED: 'Connected',
