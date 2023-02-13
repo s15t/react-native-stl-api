@@ -589,7 +589,10 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     @SuppressLint("MissingPermission")
     public void requestMTU(int mtu) {
       if (checkPermissions() && mGatt != null) {
-        mGatt.requestMtu(mtu);
+        if (!mGatt.requestMtu(mtu)) {
+          mRequestMtuPromise.reject("E_GATT_ERROR", "Cannot be changed MTU.");
+          mRequestMtuPromise = null;
+        }
       }
     }
 
