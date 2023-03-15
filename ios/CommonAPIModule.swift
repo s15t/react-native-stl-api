@@ -18,6 +18,25 @@ class CommonAPIModule: NSObject, RCTBridgeModule {
     static func requiresMainQueueSetup() -> Bool {
         return false
     }
+    
+    @objc(checkLocalNetworking:)
+    func checkLocalNetworking(resolver: RCTPromiseResolveBlock) {
+        resolver(UserDefaults.standard.bool(forKey: "NSAllowsLocalNetworking"))
+    }
+    
+    @objc(navigateToSettings:rejecter:)
+    func navigateToSettings(resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
+        if let settingURL = URL(string: UIApplication.openSettingsURLString) {
+            if UIApplication.shared.canOpenURL(settingURL) {
+                UIApplication.shared.open(settingURL, options: [:])
+                resolver(nil)
+            } else {
+                rejecter("NAVIGATE_TO_SETTINGS_FAILER", "Cannot navigate to setting URL.", nil)
+            }
+        } else {
+            rejecter("NAVIGATE_TO_SETTINGS_FAILER", "Cannot read setting URL.", nil)
+        }
+    }
 
     @objc(getKeyHashes:withRejecter:)
     func getKeyHashes(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {

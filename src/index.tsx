@@ -260,6 +260,22 @@ const API = {
         return Promise.resolve(true);
       }
     },
+    checkLocalNetworking: function (): Promise<boolean> {
+      if (Platform.OS === 'ios') {
+        return common.checkLocalNetworking();
+      } else {
+        return Promise.resolve(true);
+      }
+    },
+    navigateToSettings: async function () {
+      if (Platform.OS === 'ios') {
+        try {
+          await common.navigateToSettings();
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    },
   },
   COLOR_MODE: {
     DEFAULT: common.COLOR_MODE.DEFAULT as number,
