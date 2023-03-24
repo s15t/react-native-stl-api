@@ -113,9 +113,24 @@ const API = {
     },
     connect: (identifier: string) => ble.connect(identifier),
     disconnect: () => ble.disconnect(),
-    discoverServices: (): Promise<BluetoothGattServicesProps> => {
-      return ble.discoverServices();
-    },
+    ...Platform.select({
+      android: {
+        discoverServices: (): Promise<BluetoothGattServicesProps> => {
+          return ble.discoverServices();
+        },
+      },
+      ios: {
+        discoverServices: (): Promise<string[]> => {
+          return ble.discoverServices();
+        },
+        discoverCharacteristics: (uuid: string): Promise<string[]> => {
+          return ble.discoverCharacteristics(uuid);
+        },
+        discoverDescriptors: (uuid: string): Promise<string[]> => {
+          return ble.discoverDescriptors(uuid);
+        },
+      },
+    }),
     writeCharacteristic: (
       serviceId: string,
       uuid: string,
@@ -277,11 +292,16 @@ const API = {
       }
     },
   },
-  COLOR_MODE: {
-    DEFAULT: common.COLOR_MODE.DEFAULT as number,
-    WIDE_COLOR_GAMUT: common.COLOR_MODE.WIDE_COLOR_GAMUT as number,
-    HDR: common.COLOR_MODE.HDR as number,
-  },
+  ...Platform.select({
+    android: {
+      COLOR_MODE: {
+        DEFAULT: common.COLOR_MODE.DEFAULT as number,
+        WIDE_COLOR_GAMUT: common.COLOR_MODE.WIDE_COLOR_GAMUT as number,
+        HDR: common.COLOR_MODE.HDR as number,
+      },
+    },
+    ios: {},
+  }),
   register: {
     getNearbyDevice: function (): Promise<RegisterGetNearbyDevice> {
       return register.getNearbyDevice();
