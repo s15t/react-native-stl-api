@@ -6,20 +6,22 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start"
+    "start": "react-native start",
+    "pods": "RCT_NEW_ARCH_ENABLED=1 pod-install --quiet"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.5.3",
     "@react-navigation/native": "^6.1.2",
-    "react": "17.0.2",
-    "react-native": "0.67.4",
+    "react": "18.2.0",
+    "react-native": "0.71.4",
     "react-native-safe-area-context": "^4.4.1",
     "react-native-screens": "^3.18.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/runtime": "^7.12.5",
-    "babel-plugin-module-resolver": "^4.0.0",
-    "metro-react-native-babel-preset": "^0.66.2"
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@babel/runtime": "^7.20.0",
+    "metro-react-native-babel-preset": "0.73.8",
+    "babel-plugin-module-resolver": "^4.1.0"
   }
 }
