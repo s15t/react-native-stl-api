@@ -65,10 +65,15 @@ type BluetoothGattReadDescriptorProps = {
 };
 
 const BluetoothGattCharacteristic: BluetoothGattCharacteristicProps =
-  ble.getConstants().BluetoothGattCharacteristic;
+  Platform.select({
+    android: ble.getConstants().BluetoothGattCharacteristic,
+    ios: { PERMISSION: {}, PROPERTY: {} },
+  });
 
-const BluetoothGattDescriptor: BluetoothGattDescriptorProps =
-  ble.getConstants().BluetoothGattDescriptor;
+const BluetoothGattDescriptor: BluetoothGattDescriptorProps = Platform.select({
+  android: ble.getConstants().BluetoothGattDescriptor,
+  ios: { PERMISSION: {}, PROPERTY: {} },
+});
 
 const API = {
   ble: {
