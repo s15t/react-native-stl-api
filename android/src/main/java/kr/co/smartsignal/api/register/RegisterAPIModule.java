@@ -27,8 +27,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 @ReactModule(name = RegisterAPIModule.NAME)
-public class RegisterAPIModule extends ReactContextBaseJavaModule {
-  public static final String NAME = "register";
+public class RegisterAPIModule extends RegisterApiSpec {
+  public static final String NAME = "RegisterApi";
   private final String TAG = "STLApiRegister";
 
   private BluetoothAdapter mBluetoothAdapter;
@@ -108,8 +108,7 @@ public class RegisterAPIModule extends ReactContextBaseJavaModule {
     } else {
       if (!mBluetoothAdapter.isDiscovering()) {
         ArrayList<ScanFilter> filters = new ArrayList<ScanFilter>();
-        filters.add(new ScanFilter.Builder().setManufacturerData(0x088C, new byte[]{}).build());
-        // filters.add(new ScanFilter.Builder().setManufacturerData(0x0AB9, new byte[]{}).build());
+        filters.add(new ScanFilter.Builder().setManufacturerData(0x0AB9, new byte[]{}).build());
         ScanSettings settings = new ScanSettings.Builder()
           .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
           .setReportDelay(0)

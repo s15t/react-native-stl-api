@@ -29,17 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
-import com.facebook.react.bridge.ActivityEventListener;
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.BaseActivityEventListener;
-import com.facebook.react.bridge.Promise;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
-import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.*;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
@@ -51,14 +41,14 @@ import java.util.Map;
 import java.util.UUID;
 
 @ReactModule(name = BluetoothModule.NAME)
-public class BluetoothModule extends ReactContextBaseJavaModule {
+public class BluetoothModule extends BluetoothModuleSpec {
 
   private static final int PERMISSION_SCAN_RESULT_CODE = 5001;
   private static final int PERMISSION_ADVERTISE_RESULT_CODE = 5002;
 
   private static final String E_ACTIVITY_DOES_NOT_EXIST = "E_ACTIVITY_DOES_NOT_EXIST";
 
-  public static final String NAME = "ble";
+  public static final String NAME = "BluetoothModule";
 
   private final ReactContext mReactContext;
   private final Context mContext;
@@ -91,9 +81,8 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     return NAME;
   }
 
-  @Nullable
   @Override
-  public Map<String, Object> getConstants() {
+  protected Map<String, Object> getTypedExportedConstants() {
     final Map<String, Object> constants = new HashMap<>();
     constants.put("BluetoothGattCharacteristic", getBluetoothGattCharacteristicConstants());
     constants.put("BluetoothGattDescriptor", getBluetoothGattDescriptorConstants());
@@ -152,8 +141,21 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void removeListeners(double count) {
+    // Set up any upstream listeners or background tasks as necessary
+  }
+
+  @ReactMethod
   public void removeListeners(Integer count) {
     // Remove upstream listeners, stop unnecessary background tasks
+  }
+
+  @ReactMethod
+  public void startAdvertising(ReadableMap advertisementData) {
+  }
+
+  @ReactMethod
+  public void stopAdvertising() {
   }
 
   @ReactMethod
@@ -176,6 +178,11 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
     }
     mCoreBluetooth.setCompanyIds(listCompanyId);
     mCoreBluetooth.startScan(filters);
+  }
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public boolean isScanning() {
+    return mCoreBluetooth.isDiscovering();
   }
 
   @ReactMethod
@@ -249,9 +256,9 @@ public class BluetoothModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void requestMTU(int mtu, Promise promise) {
+  public void requestMTU(double mtu, Promise promise) {
     mRequestMtuPromise = promise;
-    mCoreBluetooth.requestMTU(mtu);
+    mCoreBluetooth.requestMTU((int) mtu);
   }
 
   @ReactMethod

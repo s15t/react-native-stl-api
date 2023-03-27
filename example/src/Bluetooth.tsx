@@ -4,14 +4,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import STL from 'react-native-stl-api';
+// @ts-expect-error
+import STL from '@stl1/react-native-stl-api';
 
 export default function BluetoothScreen() {
   const [isBluetooth, setIsBluetooth] = useState(false);
 
   const checkPermission = async () => {
-    const result = await STL.ble.checkScanPermission();
-    setIsBluetooth(result);
+    try {
+      const result = await STL.ble.checkScanPermission();
+      setIsBluetooth(result);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const requestPermission = async () => {
@@ -40,7 +45,9 @@ export default function BluetoothScreen() {
   };
 
   useEffect(() => {
-    STL.ble.emitter.addListener(STL.ble.eventType.ON_FOUND, (data) => { console.log(data); });
+    STL.ble.emitter.addListener(STL.ble.eventType.ON_FOUND, (data: any) => {
+      console.log(data);
+    });
     checkPermission().then(() => false);
 
     return () => {

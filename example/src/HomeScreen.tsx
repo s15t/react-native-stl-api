@@ -5,7 +5,8 @@
 
 import React from 'react';
 import { StyleSheet, View, Text, Button, Image } from 'react-native';
-import STL from 'react-native-stl-api';
+// @ts-expect-error
+import STL from '@stl1/react-native-stl-api';
 import { useState } from 'react';
 
 export default function HomeScreen() {
@@ -37,9 +38,15 @@ export default function HomeScreen() {
   };
 
   React.useEffect(() => {
-    changeColorMode(STL.COLOR_MODE.WIDE_COLOR_GAMUT).then(() => false);
-    updateColorMode().then(() => false);
-    STL.common.getKeyHashes().then((hashes) => setKeyHashes(hashes));
+    (async () => {
+      try {
+        await STL.common.setColorMode(STL.COLOR_MODE.WIDE_COLOR_GAMUT);
+        await updateColorMode();
+      } catch (err) {}
+      try {
+        setKeyHashes(await STL.common.getKeyHashes());
+      } catch (err) {}
+    })();
   }, []);
 
   return (

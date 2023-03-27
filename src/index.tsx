@@ -6,8 +6,14 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-const common = NativeModules.common
-  ? NativeModules.common
+// @ts-expect-error
+const isTurboModuleEnabled = global.__turboModuleProxy != null;
+
+const CommonModule = isTurboModuleEnabled
+  ? require('./NativeCommon').default
+  : NativeModules.Common;
+const common = CommonModule
+  ? CommonModule
   : new Proxy(
       {},
       {
@@ -17,8 +23,11 @@ const common = NativeModules.common
       }
     );
 
-const register = NativeModules.register
-  ? NativeModules.register
+const BluetoothModule = isTurboModuleEnabled
+  ? require('./NativeBluetoothModule').default
+  : NativeModules.BluetoothModule;
+const ble = BluetoothModule
+  ? BluetoothModule
   : new Proxy(
       {},
       {
@@ -27,18 +36,7 @@ const register = NativeModules.register
         },
       }
     );
-
-const ble = NativeModules.ble
-  ? NativeModules.ble
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
-const bleEmitter = new NativeEventEmitter(NativeModules.ble);
+const bleEmitter = new NativeEventEmitter(ble);
 
 type BluetoothGattCharacteristicProps = {
   PERMISSION: { [key: string]: number };
@@ -67,15 +65,10 @@ type BluetoothGattReadDescriptorProps = {
 };
 
 const BluetoothGattCharacteristic: BluetoothGattCharacteristicProps =
-  ble.BluetoothGattCharacteristic;
+  ble.getConstants().BluetoothGattCharacteristic;
 
 const BluetoothGattDescriptor: BluetoothGattDescriptorProps =
-  ble.BluetoothGattDescriptor;
-
-interface RegisterGetNearbyDevice {
-  id: string;
-  type: number;
-}
+  ble.getConstants().BluetoothGattDescriptor;
 
 const API = {
   ble: {
@@ -183,52 +176,60 @@ const API = {
         },
       }),
     },
-    BluetoothGattCharacteristic: {
-      PROPERTY: {
-        BROADCAST: BluetoothGattCharacteristic.PROPERTY.BROADCAST,
-        EXTENDED_PROPS: BluetoothGattCharacteristic.PROPERTY.EXTENDED_PROPS,
-        INDICATE: BluetoothGattCharacteristic.PROPERTY.INDICATE,
-        NOTIFY: BluetoothGattCharacteristic.PROPERTY.NOTIFY,
-        READ: BluetoothGattCharacteristic.PROPERTY.READ,
-        SIGNED_WRITE: BluetoothGattCharacteristic.PROPERTY.SIGNED_WRITE,
-        WRITE: BluetoothGattCharacteristic.PROPERTY.WRITE,
-        WRITE_NO_RESPONSE:
-          BluetoothGattCharacteristic.PROPERTY.WRITE_NO_RESPONSE,
+    ...Platform.select({
+      android: {
+        BluetoothGattCharacteristic: {
+          PROPERTY: {
+            BROADCAST: BluetoothGattCharacteristic.PROPERTY.BROADCAST,
+            EXTENDED_PROPS: BluetoothGattCharacteristic.PROPERTY.EXTENDED_PROPS,
+            INDICATE: BluetoothGattCharacteristic.PROPERTY.INDICATE,
+            NOTIFY: BluetoothGattCharacteristic.PROPERTY.NOTIFY,
+            READ: BluetoothGattCharacteristic.PROPERTY.READ,
+            SIGNED_WRITE: BluetoothGattCharacteristic.PROPERTY.SIGNED_WRITE,
+            WRITE: BluetoothGattCharacteristic.PROPERTY.WRITE,
+            WRITE_NO_RESPONSE:
+              BluetoothGattCharacteristic.PROPERTY.WRITE_NO_RESPONSE,
+          },
+          PERMISSION: {
+            READ: BluetoothGattCharacteristic.PERMISSION.READ,
+            READ_ENCRYPTED:
+              BluetoothGattCharacteristic.PERMISSION.READ_ENCRYPTED,
+            READ_ENCRYPTED_MITM:
+              BluetoothGattCharacteristic.PERMISSION.READ_ENCRYPTED_MITM,
+            WRITE: BluetoothGattCharacteristic.PERMISSION.WRITE,
+            WRITE_ENCRYPTED:
+              BluetoothGattCharacteristic.PERMISSION.WRITE_ENCRYPTED,
+            WRITE_ENCRYPTED_MITM:
+              BluetoothGattCharacteristic.PERMISSION.WRITE_ENCRYPTED_MITM,
+            WRITE_SIGNED: BluetoothGattCharacteristic.PERMISSION.WRITE_SIGNED,
+            WRITE_SIGNED_MITM:
+              BluetoothGattCharacteristic.PERMISSION.WRITE_SIGNED_MITM,
+          },
+        },
+        BluetoothGattDescriptor: {
+          PERMISSION: {
+            READ: BluetoothGattDescriptor.PERMISSION.READ,
+            READ_ENCRYPTED: BluetoothGattDescriptor.PERMISSION.READ_ENCRYPTED,
+            READ_ENCRYPTED_MITM:
+              BluetoothGattDescriptor.PERMISSION.READ_ENCRYPTED_MITM,
+            WRITE: BluetoothGattDescriptor.PERMISSION.WRITE,
+            WRITE_ENCRYPTED: BluetoothGattDescriptor.PERMISSION.WRITE_ENCRYPTED,
+            WRITE_ENCRYPTED_MITM:
+              BluetoothGattDescriptor.PERMISSION.WRITE_ENCRYPTED_MITM,
+            WRITE_SIGNED: BluetoothGattDescriptor.PERMISSION.WRITE_SIGNED,
+            WRITE_SIGNED_MITM:
+              BluetoothGattDescriptor.PERMISSION.WRITE_SIGNED_MITM,
+          },
+        },
       },
-      PERMISSION: {
-        READ: BluetoothGattCharacteristic.PERMISSION.READ,
-        READ_ENCRYPTED: BluetoothGattCharacteristic.PERMISSION.READ_ENCRYPTED,
-        READ_ENCRYPTED_MITM:
-          BluetoothGattCharacteristic.PERMISSION.READ_ENCRYPTED_MITM,
-        WRITE: BluetoothGattCharacteristic.PERMISSION.WRITE,
-        WRITE_ENCRYPTED: BluetoothGattCharacteristic.PERMISSION.WRITE_ENCRYPTED,
-        WRITE_ENCRYPTED_MITM:
-          BluetoothGattCharacteristic.PERMISSION.WRITE_ENCRYPTED_MITM,
-        WRITE_SIGNED: BluetoothGattCharacteristic.PERMISSION.WRITE_SIGNED,
-        WRITE_SIGNED_MITM:
-          BluetoothGattCharacteristic.PERMISSION.WRITE_SIGNED_MITM,
-      },
-    },
-    BluetoothGattDescriptor: {
-      PERMISSION: {
-        READ: BluetoothGattDescriptor.PERMISSION.READ,
-        READ_ENCRYPTED: BluetoothGattDescriptor.PERMISSION.READ_ENCRYPTED,
-        READ_ENCRYPTED_MITM:
-          BluetoothGattDescriptor.PERMISSION.READ_ENCRYPTED_MITM,
-        WRITE: BluetoothGattDescriptor.PERMISSION.WRITE,
-        WRITE_ENCRYPTED: BluetoothGattDescriptor.PERMISSION.WRITE_ENCRYPTED,
-        WRITE_ENCRYPTED_MITM:
-          BluetoothGattDescriptor.PERMISSION.WRITE_ENCRYPTED_MITM,
-        WRITE_SIGNED: BluetoothGattDescriptor.PERMISSION.WRITE_SIGNED,
-        WRITE_SIGNED_MITM: BluetoothGattDescriptor.PERMISSION.WRITE_SIGNED_MITM,
-      },
-    },
+      ios: {},
+    }),
   },
   common: {
-    name: common.name as string,
-    version: common.version as string,
-    buildVersion: common.buildVersion as number,
-    identifier: common.identifier as string,
+    name: common.getConstants().name as string,
+    version: common.getConstants().version as string,
+    buildVersion: common.getConstants().buildVersion as number,
+    identifier: common.getConstants().identifier as string,
     setColorMode: function (colorMode: number): Promise<null> {
       if (Platform.OS === 'android') {
         return common.setColorMode(colorMode);
@@ -295,17 +296,16 @@ const API = {
   ...Platform.select({
     android: {
       COLOR_MODE: {
-        DEFAULT: common.COLOR_MODE.DEFAULT as number,
-        WIDE_COLOR_GAMUT: common.COLOR_MODE.WIDE_COLOR_GAMUT as number,
-        HDR: common.COLOR_MODE.HDR as number,
+        DEFAULT: common.getConstants().COLOR_MODE.DEFAULT as number,
+        WIDE_COLOR_GAMUT: common.getConstants().COLOR_MODE
+          .WIDE_COLOR_GAMUT as number,
+        HDR: common.getConstants().COLOR_MODE.HDR as number,
       },
     },
     ios: {},
   }),
   register: {
-    getNearbyDevice: function (): Promise<RegisterGetNearbyDevice> {
-      return register.getNearbyDevice();
-    },
+    getNearbyDevice: function (): void {},
   },
 };
 

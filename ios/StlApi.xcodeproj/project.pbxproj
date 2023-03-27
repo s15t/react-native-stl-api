@@ -7,10 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9F8E51F127EFF4DA00F7D9A9 /* RegisterAPIModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F8E51EB27EFF3D600F7D9A9 /* RegisterAPIModule.swift */; };
-		9F8E51F227EFF4DF00F7D9A9 /* RegisterAPIModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F8E51EF27EFF42F00F7D9A9 /* RegisterAPIModule.m */; };
-		9F8E51F327EFF4E600F7D9A9 /* CommonAPIModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F8E51E927EFF39900F7D9A9 /* CommonAPIModule.swift */; };
-		9F8E51F427EFF4EA00F7D9A9 /* CommonAPIModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F8E51EA27EFF39A00F7D9A9 /* CommonAPIModule.m */; };
+		9F54735829D158B1009EA66F /* RegisterApi.h in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735029D158B1009EA66F /* RegisterApi.h */; };
+		9F54735929D158B1009EA66F /* RegisterApi.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735129D158B1009EA66F /* RegisterApi.mm */; };
+		9F54735A29D158B1009EA66F /* Common.h in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735229D158B1009EA66F /* Common.h */; };
+		9F54735B29D158B1009EA66F /* Common.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735329D158B1009EA66F /* Common.mm */; };
+		9F54735C29D158B1009EA66F /* BluetoothModule.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735429D158B1009EA66F /* BluetoothModule.mm */; };
+		9F54735D29D158B1009EA66F /* RNPromise.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735529D158B1009EA66F /* RNPromise.mm */; };
+		9F54735E29D158B1009EA66F /* BluetoothModule.h in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735629D158B1009EA66F /* BluetoothModule.h */; };
+		9F54735F29D158B1009EA66F /* RNPromise.h in Sources */ = {isa = PBXBuildFile; fileRef = 9F54735729D158B1009EA66F /* RNPromise.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,11 +31,14 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libStlApi.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libStlApi.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		9F8E51E927EFF39900F7D9A9 /* CommonAPIModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonAPIModule.swift; sourceTree = "<group>"; };
-		9F8E51EA27EFF39A00F7D9A9 /* CommonAPIModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CommonAPIModule.m; sourceTree = "<group>"; };
-		9F8E51EB27EFF3D600F7D9A9 /* RegisterAPIModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterAPIModule.swift; sourceTree = "<group>"; };
-		9F8E51EF27EFF42F00F7D9A9 /* RegisterAPIModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RegisterAPIModule.m; sourceTree = "<group>"; };
-		F4FF95D5245B92E700C19C63 /* StlApi-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StlApi-Bridging-Header.h"; sourceTree = "<group>"; };
+		9F54735029D158B1009EA66F /* RegisterApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RegisterApi.h; sourceTree = "<group>"; };
+		9F54735129D158B1009EA66F /* RegisterApi.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RegisterApi.mm; sourceTree = "<group>"; };
+		9F54735229D158B1009EA66F /* Common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
+		9F54735329D158B1009EA66F /* Common.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Common.mm; sourceTree = "<group>"; };
+		9F54735429D158B1009EA66F /* BluetoothModule.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BluetoothModule.mm; sourceTree = "<group>"; };
+		9F54735529D158B1009EA66F /* RNPromise.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = RNPromise.mm; sourceTree = "<group>"; };
+		9F54735629D158B1009EA66F /* BluetoothModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BluetoothModule.h; sourceTree = "<group>"; };
+		9F54735729D158B1009EA66F /* RNPromise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNPromise.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,11 +63,14 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				F4FF95D5245B92E700C19C63 /* StlApi-Bridging-Header.h */,
-				9F8E51EA27EFF39A00F7D9A9 /* CommonAPIModule.m */,
-				9F8E51E927EFF39900F7D9A9 /* CommonAPIModule.swift */,
-				9F8E51EF27EFF42F00F7D9A9 /* RegisterAPIModule.m */,
-				9F8E51EB27EFF3D600F7D9A9 /* RegisterAPIModule.swift */,
+				9F54735629D158B1009EA66F /* BluetoothModule.h */,
+				9F54735429D158B1009EA66F /* BluetoothModule.mm */,
+				9F54735229D158B1009EA66F /* Common.h */,
+				9F54735329D158B1009EA66F /* Common.mm */,
+				9F54735029D158B1009EA66F /* RegisterApi.h */,
+				9F54735129D158B1009EA66F /* RegisterApi.mm */,
+				9F54735729D158B1009EA66F /* RNPromise.h */,
+				9F54735529D158B1009EA66F /* RNPromise.mm */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -122,10 +132,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9F8E51F427EFF4EA00F7D9A9 /* CommonAPIModule.m in Sources */,
-				9F8E51F227EFF4DF00F7D9A9 /* RegisterAPIModule.m in Sources */,
-				9F8E51F127EFF4DA00F7D9A9 /* RegisterAPIModule.swift in Sources */,
-				9F8E51F327EFF4E600F7D9A9 /* CommonAPIModule.swift in Sources */,
+				9F54735829D158B1009EA66F /* RegisterApi.h in Sources */,
+				9F54735929D158B1009EA66F /* RegisterApi.mm in Sources */,
+				9F54735A29D158B1009EA66F /* Common.h in Sources */,
+				9F54735B29D158B1009EA66F /* Common.mm in Sources */,
+				9F54735C29D158B1009EA66F /* BluetoothModule.mm in Sources */,
+				9F54735D29D158B1009EA66F /* RNPromise.mm in Sources */,
+				9F54735E29D158B1009EA66F /* BluetoothModule.h in Sources */,
+				9F54735F29D158B1009EA66F /* RNPromise.h in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

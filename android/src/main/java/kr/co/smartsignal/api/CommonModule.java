@@ -22,7 +22,6 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.module.annotations.ReactModule;
@@ -32,21 +31,21 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-@ReactModule(name = StlApiModule.NAME)
-public class StlApiModule extends ReactContextBaseJavaModule {
+@ReactModule(name = CommonModule.NAME)
+public class CommonModule extends CommonSpec {
   private static final int OVERLAY_PERMISSION_REQUEST = 6000;
   private static final int IGNORE_BATTERY_OPT_PERMISSION_REQUEST = 6001;
   private static final String E_ACTIVITY_DOES_NOT_EXIST = "E_ACTIVITY_DOES_NOT_EXIST";
   private static final String E_FAILED_TO_PERMIT_OVERLAY = "E_FAILED_TO_PERMIT_OVERLAY";
   private static final String E_FAILED_TO_PERMIT_BATTERY_OPT = "E_FAILED_TO_PERMIT_BATTERY_OPT";
 
-  public static final String NAME = "common";
+  public static final String NAME = "Common";
   private final ReactApplicationContext reactContext;
 
   private Promise mOverlayPromise;
   private Promise mIgnoreBatteryOptPromise;
 
-  public StlApiModule(ReactApplicationContext context) {
+  CommonModule(ReactApplicationContext context) {
     super(context);
     reactContext = context;
     reactContext.addActivityEventListener(new BaseActivityEventListener() {
@@ -80,9 +79,8 @@ public class StlApiModule extends ReactContextBaseJavaModule {
         return NAME;
     }
 
-  @Nullable
   @Override
-  public Map<String, Object> getConstants() {
+  protected Map<String, Object> getTypedExportedConstants() {
     final Map<String, Object> constants = new HashMap<>();
     try {
       PackageInfo packageInfo = reactContext
@@ -121,14 +119,14 @@ public class StlApiModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void setColorMode(int colorMode, Promise promise) {
+  public void setColorMode(double colorMode, Promise promise) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       Activity activity = getCurrentActivity();
       if (activity != null) {
         activity.runOnUiThread(new Runnable() {
           @Override
           public void run() {
-            activity.getWindow().setColorMode(colorMode);
+            activity.getWindow().setColorMode((int) colorMode);
             promise.resolve(null);
           }
         });
@@ -152,7 +150,7 @@ public class StlApiModule extends ReactContextBaseJavaModule {
     }
   }
 
-  @ReactMethod
+  @ReactMethod(isBlockingSynchronousMethod = true)
   public boolean canDrawOverlays() {
     boolean canDraw;
     Context context = reactContext.getApplicationContext();
@@ -197,7 +195,7 @@ public class StlApiModule extends ReactContextBaseJavaModule {
     }
   }
 
-  @ReactMethod
+  @ReactMethod(isBlockingSynchronousMethod = true)
   public boolean isIgnoringBatteryOptimizations() {
     boolean isIgnored = false;
     Context context = reactContext.getApplicationContext();
