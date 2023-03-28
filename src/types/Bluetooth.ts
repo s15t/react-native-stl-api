@@ -70,7 +70,10 @@ type Bluetooth = {
     uuid: string,
     data: string
   ) => Promise<void>;
-  readCharacteristic: (serviceId: string, uuid: string) => Promise<void>;
+  readCharacteristic: (
+    serviceId: string,
+    uuid: string
+  ) => Promise<{ uuid: string; data: string }>;
   writeDescriptor: (
     serviceId: string,
     characteristicId: string,
@@ -81,7 +84,8 @@ type Bluetooth = {
     serviceId: string,
     characteristicId: string,
     uuid: string
-  ) => Promise<void>;
+  ) => Promise<{ uuid: string; data: string }>;
+  requestMTU: (mtu: number) => Promise<void>;
   emitter: typeof NativeEventEmitter;
   eventType: {
     ON_CONNECTED: string;

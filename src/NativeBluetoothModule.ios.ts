@@ -24,7 +24,10 @@ export interface Spec extends TurboModule {
     uuid: string,
     data: string
   ): Promise<void>;
-  readCharacteristic(serviceId: string, uuid: string): Promise<void>;
+  readCharacteristic(
+    serviceId: string,
+    uuid: string
+  ): Promise<{ uuid: string; data: string }>;
   writeDescriptor(
     serviceId: string,
     characteristicId: string,
@@ -35,7 +38,7 @@ export interface Spec extends TurboModule {
     serviceId: string,
     characteristicId: string,
     uuid: string
-  ): Promise<void>;
+  ): Promise<{ uuid: string; data: string }>;
 
   // RCTEventEmitter method
   addListener(eventName: string): void;
