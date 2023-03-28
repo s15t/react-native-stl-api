@@ -1,10 +1,6 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
-
-export type BluetoothAdvertisementData = {
-  localName?: string;
-  serviceUUIDs?: string;
-};
+import type { BluetoothAdvertisementData } from './types/BluetoothAdvertisementData';
 
 export interface Spec extends TurboModule {
   readonly getConstants: () => {
