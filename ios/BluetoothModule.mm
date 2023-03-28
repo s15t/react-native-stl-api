@@ -61,9 +61,9 @@ RCT_EXPORT_MODULE()
 }
 
 RCT_REMAP_BLOCKING_SYNCHRONOUS_METHOD(checkPermission,
-                                      BOOL, checkPermission)
+                                      NSNumber *, checkPermission)
 {
-    return _isPermission;
+    return [NSNumber numberWithBool:_isPermission];
 }
 
 RCT_REMAP_METHOD(startAdvertising,
