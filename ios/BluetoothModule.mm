@@ -376,6 +376,7 @@ RCT_REMAP_METHOD(readDescriptor,
 
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(NSDictionary<NSString *,id> *)advertisementData RSSI:(NSNumber *)RSSI
 {
+    BOOL isMatched = false;
     NSString *identifier = [[peripheral identifier] UUIDString];
     NSString *localName = advertisementData[CBAdvertisementDataLocalNameKey] ?: @"Unknown Device";
     NSNumber *txPower = advertisementData[CBAdvertisementDataTxPowerLevelKey] ?: [[NSNumber alloc] initWithInt:0];
@@ -395,6 +396,7 @@ RCT_REMAP_METHOD(readDescriptor,
         if (_companyIds.count > 0) {
             for (NSNumber *companyId in _companyIds) {
                 if ([companyId unsignedShortValue] == manufacturerId) {
+                    isMatched = true;
                     if (specificData.length > 0) {
                         payload[@"ManufacturerSpecificData"] = [specificData base64EncodedStringWithOptions:0];
                     }
@@ -406,8 +408,11 @@ RCT_REMAP_METHOD(readDescriptor,
             }
         }
     }
-    _deviceMap[identifier] = peripheral;
-    [self emitWithName:@"FoundBLEDevice" body:payload];
+
+    if (isMatched || _companyIds.count == 0) {
+        _deviceMap[identifier] = peripheral;
+        [self emitWithName:@"FoundBLEDevice" body:payload];
+    }
 }
 
 //MARK: CBPeripheralManagerDelegate event
