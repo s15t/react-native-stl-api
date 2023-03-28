@@ -1,6 +1,6 @@
 {
   "name": "@stl1/react-native-stl-api",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Common API STL uses",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
