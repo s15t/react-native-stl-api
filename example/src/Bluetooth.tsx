@@ -3,7 +3,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 // @ts-expect-error
 import STL from '@stl1/react-native-stl-api';
 
@@ -20,7 +20,11 @@ export default function BluetoothScreen() {
   };
 
   const requestPermission = async () => {
-    await STL.ble.requestScanPermissions();
+    try {
+      await STL.ble.requestScanPermissions();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const isDiscovering = async () => {
@@ -56,33 +60,38 @@ export default function BluetoothScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>블루투스</Text>
+    <SafeAreaView style={styles.safeAreaView}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>블루투스</Text>
+        </View>
+        <View style={styles.controlBox}>
+          <Button title={'권한 확인'} onPress={checkPermission} />
+          <Button title={'권한 요청'} onPress={requestPermission} />
+          <Button title={'스캔 여부'} onPress={isDiscovering} />
+          <Button title={'스캔 시작'} onPress={scanStart} />
+          <Button title={'스캔 종료'} onPress={stopScan} />
+        </View>
+        <View style={styles.consoleBox}>
+          <Text style={styles.console}>
+            블루투스 권한: {isBluetooth ? '있음' : '없음'}
+          </Text>
+        </View>
       </View>
-      <View style={styles.controlBox}>
-        <Button title={'권한 확인'} onPress={checkPermission} />
-        <Button title={'권한 요청'} onPress={requestPermission} />
-        <Button title={'스캔 여부'} onPress={isDiscovering} />
-        <Button title={'스캔 시작'} onPress={scanStart} />
-        <Button title={'스캔 종료'} onPress={stopScan} />
-      </View>
-      <View style={styles.consoleBox}>
-        <Text style={styles.console}>
-          블루투스 권한: {isBluetooth ? '있음' : '없음'}
-        </Text>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeAreaView: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'stretch',
-    paddingHorizontal: 12,
-    paddingTop: 12,
+    marginHorizontal: 12,
+    paddingTop: 10,
   },
   header: {
     flexDirection: 'row',
@@ -91,7 +100,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 42,
     fontWeight: 'bold',
   },
   controlBox: {
