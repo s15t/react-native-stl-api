@@ -13,6 +13,7 @@ const Bluetooth = getModule<Spec>('BluetoothModule');
 const emitter = new NativeEventEmitter(Bluetooth);
 
 export default {
+  checkPermission: Bluetooth.checkPermission,
   startAdvertising: Bluetooth.startAdvertising,
   stopAdvertising: Bluetooth.stopAdvertising,
   startScan: Bluetooth.startScan,

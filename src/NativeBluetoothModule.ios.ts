@@ -3,6 +3,7 @@ import { TurboModuleRegistry } from 'react-native';
 import type { BluetoothAdvertisementData } from './types/BluetoothAdvertisementData';
 
 export interface Spec extends TurboModule {
+  checkPermission(): boolean;
   startAdvertising(advertisementData: BluetoothAdvertisementData): void;
   stopAdvertising(): void;
   startScan(): void;

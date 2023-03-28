@@ -17,6 +17,7 @@
     CBPeripheral *_currentPeripheral;
     NSMutableDictionary<id, CBPeripheral *> *_deviceMap;
     NSArray<NSNumber *> *_companyIds;
+    BOOL _isPermission;
 }
 
 - (instancetype)init;

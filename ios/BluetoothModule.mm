@@ -17,6 +17,7 @@ RCT_EXPORT_MODULE()
     if ((self = [super init])) {
         _manager = [[CBCentralManager alloc] initWithDelegate:self queue:dispatch_get_main_queue()];
         _peripheralManager = [[CBPeripheralManager alloc] initWithDelegate:self queue:dispatch_get_main_queue()];
+        _isPermission = false;
     }
     return self;
 }
@@ -57,6 +58,12 @@ RCT_EXPORT_MODULE()
         @"Connected",
         @"Disconnected"
     ];
+}
+
+RCT_REMAP_BLOCKING_SYNCHRONOUS_METHOD(checkPermission,
+                                      BOOL, checkPermission)
+{
+    return _isPermission;
 }
 
 RCT_REMAP_METHOD(startAdvertising,
@@ -331,12 +338,15 @@ RCT_REMAP_METHOD(readDescriptor,
     switch (central.state) {
         case CBManagerStatePoweredOn:
             [self emitWithName:@"CBManagerPowerOn" body:nil];
+            _isPermission = true;
             break;
         case CBManagerStatePoweredOff:
             [self emitWithName:@"CBManagerPowerOff" body:nil];
+            _isPermission = true;
             break;
         case CBManagerStateUnauthorized:
             [self emitWithName:@"CBManagerUnauthorized" body:nil];
+            _isPermission = false;
             break;
         default:
             break;
