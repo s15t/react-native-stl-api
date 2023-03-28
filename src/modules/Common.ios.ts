@@ -5,9 +5,9 @@
  */
 
 import type { Spec } from '../NativeCommon.ios';
-import { getModule } from '../utils';
+import { getCommonModule } from '../utils';
 
-const common = getModule<Spec>('Common');
+const common = getCommonModule<Spec>();
 
 export default {
   name: common.getConstants().name,

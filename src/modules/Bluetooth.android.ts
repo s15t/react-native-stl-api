@@ -4,12 +4,10 @@
  *
  */
 import type { Spec } from '../NativeBluetoothModule.android';
-import { getModule } from '../utils';
-import { NativeEventEmitter } from 'react-native';
+import { getBluetoothModule } from '../utils';
 import BluetoothEvent from '../types/BluetoothEvent';
 
-const Bluetooth = getModule<Spec>('BluetoothModule');
-const emitter = new NativeEventEmitter(Bluetooth);
+const Bluetooth = getBluetoothModule<Spec>();
 
 export default {
   BluetoothGattCharacteristic:
@@ -33,7 +31,6 @@ export default {
   writeDescriptor: Bluetooth.writeDescriptor,
   readDescriptor: Bluetooth.readDescriptor,
   requestMTU: Bluetooth.requestMTU,
-  emitter,
   eventType: {
     ...BluetoothEvent,
     ON_PERMIT_SCAN: 'PermitBLEScan',

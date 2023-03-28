@@ -19,9 +19,19 @@ export function checkModuleIsLinked(module: any) {
       );
 }
 
-export function getModule<T = any>(moduleName: string): T {
+export function getBluetoothModule<T = any>(): T {
+  const moduleName = 'BluetoothModule';
   const module: T = isTurboModuleEnabled
-    ? require(`./Native${moduleName}`).default
+    ? require(`./NativeBluetoothModule`).default
+    : NativeModules[moduleName];
+  checkModuleIsLinked(module);
+  return module;
+}
+
+export function getCommonModule<T = any>(): T {
+  const moduleName = 'Common';
+  const module: T = isTurboModuleEnabled
+    ? require(`./NativeCommon`).default
     : NativeModules[moduleName];
   checkModuleIsLinked(module);
   return module;

@@ -4,13 +4,11 @@
  *
  */
 
-import { NativeEventEmitter } from 'react-native';
 import type { Spec } from '../NativeBluetoothModule.ios';
 import BluetoothEvent from '../types/BluetoothEvent';
-import { getModule } from '../utils';
+import { getBluetoothModule } from '../utils';
 
-const Bluetooth = getModule<Spec>('BluetoothModule');
-const emitter = new NativeEventEmitter(Bluetooth);
+const Bluetooth = getBluetoothModule<Spec>();
 
 export default {
   checkPermission: Bluetooth.checkPermission,
@@ -29,7 +27,6 @@ export default {
   readCharacteristic: Bluetooth.readCharacteristic,
   writeDescriptor: Bluetooth.writeDescriptor,
   readDescriptor: Bluetooth.readDescriptor,
-  emitter,
   eventType: {
     ...BluetoothEvent,
     ON_POWER_ON: 'CBCentralManagerPowerOn',
